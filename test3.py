@@ -12,6 +12,7 @@ class FittingRoom:
         self.green_turn_semaphore = threading.Semaphore(0)
 
     def enter_room(self, thread_id, color):
+
         if color == "blue":
             turn_semaphore = self.blue_turn_semaphore
             self.blue_count += 1
@@ -24,14 +25,14 @@ class FittingRoom:
 
         with self.lock:
             if other_count > 0 or self.slots == 0:
-                print(f"{color.capitalize()} thread {thread_id} is in the waiting room.")
+                print(f"{color.capitalize()} thread {thread_id} is in the waiting room.\n")
                 self.lock.release()
                 turn_semaphore.acquire()
                 self.lock.acquire()
                 
             self.slots -=1
             print(f"{color.capitalize()} only.")
-            print(f"{color.capitalize()} thread {thread_id} entered. Slots left: {self.slots}")
+            print(f"{color.capitalize()} thread {thread_id} entered. Slots left: {self.slots}\n")
 
 
         
@@ -52,12 +53,13 @@ class FittingRoom:
             print(f"{color.capitalize()} thread {thread_id} exited. Slots left: {self.slots}")
 
             if self.slots == self.n:
-                print("Empty fitting room. ")
+                print("\nEmpty fitting room.\n")
+                print("-------------------------------------- \n")
                 if(other_count != 0):
                     other_semaphore.release(n)
                 else:
                     own_semaphore.release(n)
-
+            
 
 def simulate_fitting_room(n, b, g):
     fitting_room = FittingRoom(n)
@@ -67,7 +69,6 @@ def simulate_fitting_room(n, b, g):
         fitting_room.enter_room(thread_id, color)
         time.sleep(3)  # Simulate thread inside fitting room
         fitting_room.exit_room(thread_id, color)
-
     for i in range(b):
         thread = threading.Thread(target=thread_function, args=(i, "blue"))
         threads.append(thread)
@@ -81,10 +82,9 @@ def simulate_fitting_room(n, b, g):
 
     for thread in threads:
         thread.join()
-
 # Example usage
 n = int(input("Enter the number of slots inside the fitting room: "))
 b = int(input("Enter the number of blue threads: "))
 g = int(input("Enter the number of green threads: "))
-
+print("\n")
 simulate_fitting_room(n, b, g)
