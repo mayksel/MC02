@@ -8,20 +8,15 @@ class FittingRoom:
         self.blue_count = 0
         self.green_count = 0
         self.lock = threading.Lock()
-        self.lock2 = threading.Lock()
-        self.blue_semaphore = threading.Semaphore(n)
-        self.green_semaphore = threading.Semaphore(n)
         self.blue_turn_semaphore = threading.Semaphore(0)
         self.green_turn_semaphore = threading.Semaphore(0)
 
     def enter_room(self, thread_id, color):
         if color == "blue":
-            semaphore = self.blue_semaphore
             turn_semaphore = self.blue_turn_semaphore
             self.blue_count += 1
             other_count = self.green_count
         elif color == "green":
-            semaphore = self.green_semaphore
             turn_semaphore = self.green_turn_semaphore
             self.green_count += 1
             other_count = self.blue_count
@@ -34,8 +29,6 @@ class FittingRoom:
                 turn_semaphore.acquire()
                 self.lock.acquire()
                 
-            
-            semaphore.acquire()
             self.slots -=1
             print(f"{color.capitalize()} only.")
             print(f"{color.capitalize()} thread {thread_id} entered. Slots left: {self.slots}")
@@ -45,19 +38,16 @@ class FittingRoom:
 
     def exit_room(self, thread_id, color):
         if color == "blue":
-            semaphore = self.blue_semaphore
             self.blue_count -= 1
             other_count = self.green_count
             other_semaphore = self.green_turn_semaphore
             own_semaphore = self.blue_turn_semaphore
         elif color == "green":
-            semaphore = self.green_semaphore
             self.green_count -= 1
             other_count = self.blue_count
             other_semaphore = self.blue_turn_semaphore
             own_semaphore = self.green_turn_semaphore
-        with self.lock2:
-            semaphore.release()
+        with self.lock:
             self.slots += 1
             print(f"{color.capitalize()} thread {thread_id} exited. Slots left: {self.slots}")
 
@@ -75,7 +65,7 @@ def simulate_fitting_room(n, b, g):
 
     def thread_function(thread_id, color):
         fitting_room.enter_room(thread_id, color)
-        time.sleep(5)  # Simulate thread inside fitting room
+        time.sleep(3)  # Simulate thread inside fitting room
         fitting_room.exit_room(thread_id, color)
 
     for i in range(b):
